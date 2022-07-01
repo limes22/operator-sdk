@@ -1,0 +1,7 @@
+apiVersion: mygroup.podprinter.com/v1
+kind: Hello
+metadata:
+  name: hello-sample
+spec:
+  size: 3
+  name: "pjh-pod-printer"
