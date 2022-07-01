@@ -11,7 +11,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/util/intstr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -39,24 +38,9 @@ func (r *HelloReconciler) Reconcile(ctx context.Context, req ctrl.Request) (empt
 		// GET함수 에러처리
 		return emptyResult, err
 	}
-	fmt.Println(fmt.Sprintf("Here is Operator Log: %s", myCustomResource.Spec.Msg))
 
-	// CR의 정보 기반 서비스 객체 유무 검사
-	if err = r.Client.Get(ctx, types.NamespacedName{
-		Name:      myCustomResource.Name,
-		Namespace: myCustomResource.Namespace,
-	}, &corev1.Service{}); err != nil {
-		// 서비스가 없다면
-		if errors.IsNotFound(err) {
-			// 사용자 정의 서비스 생성 로직 실행
-			if err = r.Create(ctx, r.createService(myCustomResource)); err != nil {
-				return emptyResult, err
-			}
-			return ctrl.Result{RequeueAfter: time.Second * 2}, nil
-			// 이벤트큐에 다시 올라가 로직 재실행 방법 => (1) ctrl.Result의 Requeue를 true로 설정 (2) RequeueAfter 시간 지정
-		}
-		return emptyResult, err
-	}
+	// Print Spec.Msg Of Custom Resource (CR)
+	fmt.Println(fmt.Sprintf("Here is Operator Log: %s", myCustomResource.Spec.Msg))
 
 	// CR의 정보 기반 디플로이먼트 객체 유무 검사
 	myDeployment := &appsv1.Deployment{}
@@ -64,11 +48,13 @@ func (r *HelloReconciler) Reconcile(ctx context.Context, req ctrl.Request) (empt
 		Name:      myCustomResource.Name,
 		Namespace: myCustomResource.Namespace,
 	}, myDeployment); err != nil {
+		// 없다면
 		if errors.IsNotFound(err) {
 			if err = r.Create(ctx, r.createDeployment(myCustomResource)); err != nil {
 				return emptyResult, err
 			}
 			return ctrl.Result{RequeueAfter: time.Second * 2}, nil
+			// 이벤트큐에 다시 올라가 로직 재실행 방법 => (1) ctrl.Result의 Requeue를 true로 설정 (2) RequeueAfter 시간 지정
 		}
 		return emptyResult, err
 	}
@@ -87,34 +73,6 @@ func (r *HelloReconciler) Reconcile(ctx context.Context, req ctrl.Request) (empt
 		return ctrl.Result{RequeueAfter: time.Second * 2}, nil
 	}
 	return emptyResult, nil
-}
-
-// Service를 생성하고 컨틀롤러에 등록해 cr이 삭제된경우 함께 삭제
-func (r *HelloReconciler) createService(m *mygroupv1.Hello) *corev1.Service {
-	myLabel := getLabelForMyCustomResource(m.Name)
-
-	// service struct
-	newService := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      m.Name,
-			Namespace: m.Namespace,
-		},
-		Spec: corev1.ServiceSpec{
-			Type:     corev1.ServiceTypeNodePort,
-			Selector: myLabel,
-			Ports: []corev1.ServicePort{
-				{
-					Protocol:   corev1.ProtocolTCP,
-					NodePort:   31321, // 외부에서 31321포트로 접근
-					Port:       8375,
-					TargetPort: intstr.IntOrString{IntVal: 8395},
-				},
-			},
-		},
-	}
-	// cr이 삭제됐을때 svc가 남아있는걸 막기위해 ref에 추가
-	ctrl.SetControllerReference(m, newService, r.Scheme)
-	return newService
 }
 
 // Deployment를 생성하고 컨틀롤러에 등록해 cr이 삭제된경우 함께 삭제
