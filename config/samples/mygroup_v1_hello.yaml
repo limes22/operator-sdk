@@ -3,5 +3,5 @@ kind: Hello
 metadata:
   name: hello-sample
 spec:
-  size: 3
-  name: "pjh-pod-printer"
+  size: 1
+  msg: "pjh-pod-printer now echo print on console"

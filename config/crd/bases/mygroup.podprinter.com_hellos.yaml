@@ -35,7 +35,7 @@ spec:
           spec:
             description: HelloSpec defines the desired state of Hello
             properties:
-              name:
+              msg:
                 type: string
               size:
                 description: Foo is an example field of Hello. Edit hello_types.go
@@ -43,7 +43,7 @@ spec:
                 format: int32
                 type: integer
             required:
-            - name
+            - msg
             - size
             type: object
           status:

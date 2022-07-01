@@ -30,7 +30,7 @@ type HelloSpec struct {
 
 	// Foo is an example field of Hello. Edit hello_types.go to remove/update
 	Size int32  `json:"size"`
-	Name string `json:"name"`
+	Msg  string `json:"msg"`
 }
 
 // HelloStatus defines the observed state of Hello

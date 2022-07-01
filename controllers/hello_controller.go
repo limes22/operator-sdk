@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -38,6 +39,7 @@ func (r *HelloReconciler) Reconcile(ctx context.Context, req ctrl.Request) (empt
 		// GET함수 에러처리
 		return emptyResult, err
 	}
+	fmt.Println(fmt.Sprintf("Here is Operator Log: %s", myCustomResource.Spec.Msg))
 
 	// CR의 정보 기반 서비스 객체 유무 검사
 	if err = r.Client.Get(ctx, types.NamespacedName{
@@ -137,8 +139,9 @@ func (r *HelloReconciler) createDeployment(m *mygroupv1.Hello) *appsv1.Deploymen
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{{
-						Image: "busybox",
-						Name:  m.Name,
+						Image:   "busybox",
+						Name:    m.Name,
+						Command: []string{"/bin/echo", m.Spec.Msg},
 					}},
 				},
 			},
