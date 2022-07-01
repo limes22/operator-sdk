@@ -1,94 +1,30 @@
 # podprinter
-// TODO(user): Add simple overview of use/purpose
-
+ - CRD 작업 사항 template 코드 떨구기
+    ```sh
+    make manifests
+    ```
+ 
+ - CRD 를 ETCD로 밀어넣기
+    ```sh
+    make install
+    ```
+ 
+ - Custom Controller 실행 (main.go 파일)
+    ```
+    make run
+    ```
+ 
+ - CR 배포
+    ```sh
+    kubectl apply -f config/samples/mygroup_v1_hello.yaml
+    ```
+ 
 ## Description
-// TODO(user): An in-depth paragraph about your project and overview of use
-
-## Getting Started
-You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.
-**Note:** Your controller will automatically use the current context in your kubeconfig file (i.e. whatever cluster `kubectl cluster-info` shows).
-
-### Running on the cluster
-1. Install Instances of Custom Resources:
-
-```sh
-kubectl apply -f config/samples/
-```
-
-2. Build and push your image to the location specified by `IMG`:
-	
-```sh
-make docker-build docker-push IMG=<some-registry>/podprinter:tag
-```
-	
-3. Deploy the controller to the cluster with the image specified by `IMG`:
-
-```sh
-make deploy IMG=<some-registry>/podprinter:tag
-```
-
-### Uninstall CRDs
-To delete the CRDs from the cluster:
-
-```sh
-make uninstall
-```
-
-### Undeploy controller
-UnDeploy the controller to the cluster:
-
-```sh
-make undeploy
-```
-
-## Contributing
-// TODO(user): Add detailed information on how you would like others to contribute to this project
-
-### How it works
-This project aims to follow the Kubernetes [Operator pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)
-
-It uses [Controllers](https://kubernetes.io/docs/concepts/architecture/controller/) 
-which provides a reconcile function responsible for synchronizing resources untile the desired state is reached on the cluster 
-
-### Test It Out
-1. Install the CRDs into the cluster:
-
-```sh
-make install
-```
-
-2. Run your controller (this will run in the foreground, so switch to a new terminal if you want to leave it running):
-
-```sh
-make run
-```
-
-**NOTE:** You can also run this in one step by running: `make install run`
-
-### Modifying the API definitions
-If you are editing the API definitions, generate the manifests such as CRs or CRDs using:
-
-```sh
-make manifests
-```
-
-**NOTE:** Run `make --help` for more information on all potential `make` targets
-
-More information can be found via the [Kubebuilder Documentation](https://book.kubebuilder.io/introduction.html)
-
-## License
-
-Copyright 2022.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
+ - CR 배포 네임스페이스 => 현재 kubectl 이 바라보고 있는 namespace context
+ - Custom Controller
+   - CR Watch 범위: 모든 네임스페이스 (별도 제한 범위 설정 X)
+   - CR Event 감지시 Logs 출력
+   - CR 의 name 과 namespace 를 토대로 Deployment 존재 유무 검사
+     - 없을 경우 Deployment 배포, 배포된 pod는 CR의 spec.msg 출력
+   - CR의 spec.size 와 deployment의 replicaSet 개수 일치 여부 검사
+     - spec.size 만큼 deployment의 replicaSet 개수 동기화
