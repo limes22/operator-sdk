@@ -117,10 +117,9 @@ func getLabelForMyCustomResource(name string) map[string]string {
 // SetupWithManager sets up the controller with the Manager.
 func (r *HelloReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// For에 감시할 cr을 설정해주고
-	// Owns는 서브로 감시할 대상을 설정합니다.(서브로 감시하는 대상이 삭제된경우 reconcile되도록)
-	// 서브로 감시할 대상에 추가된 service와 deployment는
-	// 추후 사용자가 임의로 삭제했을때 다시 복구됩니다.
-	// cr이 삭제됐을때 svc와 dep가 함께 삭제 => 컨트롤러에 ref 추가
+	// Owns는 서브로 감시할 대상을 설정 (서브로 감시하는 대상이 삭제된경우 reconcile되도록)
+	// 서브로 감시할 대상에 추가된 deployment는 추후 사용자가 임의로 삭제했을때 다시 복구됨
+	// cr이 삭제됐을때는 svc와 dep가 함께 삭제 => 컨트롤러에 ref 추가
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&mygroupv1.Hello{}).
 		Owns(&appsv1.Deployment{}).
