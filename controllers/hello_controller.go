@@ -123,7 +123,6 @@ func (r *HelloReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// cr이 삭제됐을때 svc와 dep가 함께 삭제 => 컨트롤러에 ref 추가
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&mygroupv1.Hello{}).
-		Owns(&corev1.Service{}).
 		Owns(&appsv1.Deployment{}).
 		Complete(r)
 }
